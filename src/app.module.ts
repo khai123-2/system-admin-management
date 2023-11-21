@@ -8,12 +8,15 @@ import { RoleModule } from './role/role.module';
 import { EmployeeModule } from './employee/employee.module';
 import { CustomerModule } from './customer/customer.module';
 import { PermissionModule } from './permission/permission.module';
+import { AuthModule } from './auth/auth.module';
+import authConfig from './config/auth.config';
+import { JwtModule } from '@nestjs/jwt';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
-      load: [databaseConfig],
+      load: [databaseConfig, authConfig],
     }),
     TypeOrmModule.forRootAsync({
       useClass: TypeOrmConfigService,
@@ -23,6 +26,7 @@ import { PermissionModule } from './permission/permission.module';
     EmployeeModule,
     CustomerModule,
     PermissionModule,
+    AuthModule,
   ],
 })
 export class AppModule {}

@@ -15,7 +15,14 @@ export type AppConfig = {
   port: number;
 };
 
+export type AuthConfig = {
+  secret: string;
+  tokenEmailExpires: string;
+  tokenExpires: string;
+};
+
 export type AllTypeConfig = {
   database: DatabaseConfig;
   app: AppConfig;
+  auth: AuthConfig;
 };
