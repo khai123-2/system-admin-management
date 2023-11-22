@@ -10,7 +10,6 @@ import { CustomerModule } from './customer/customer.module';
 import { PermissionModule } from './permission/permission.module';
 import { AuthModule } from './auth/auth.module';
 import authConfig from './config/auth.config';
-import { JwtModule } from '@nestjs/jwt';
 
 @Module({
   imports: [
