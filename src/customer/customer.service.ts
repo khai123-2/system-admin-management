@@ -1,74 +1,53 @@
-import {
-  Injectable,
-  NotFoundException,
-  UnauthorizedException,
-} from '@nestjs/common';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Customer } from './entities/customer.entity';
-import { FindOptionsWhere, Repository } from 'typeorm';
+import { Repository } from 'typeorm';
 import { Employee } from 'src/employee/entities/employee.entity';
 import { CreateCustomerDto } from './dtos/create-customer.dto';
 import { UpdateCustomerDto } from './dtos/update-customer.dto';
+import { BaseService } from 'src/utils/base.service';
 
 @Injectable()
-export class CustomerService {
+export class CustomerService extends BaseService<Customer> {
   constructor(
     @InjectRepository(Customer)
     private readonly customerRepository: Repository<Customer>,
-  ) {}
-
-  async getAllCustomers(
-    fields: FindOptionsWhere<Customer> | FindOptionsWhere<Customer>[],
-    relationOptions?: string[],
   ) {
-    return await this.customerRepository.find({
-      where: fields,
-      relations: relationOptions,
-    });
+    super(customerRepository, 'Customer not found');
   }
 
-  async getCustomer(
-    fields: FindOptionsWhere<Customer> | FindOptionsWhere<Customer>[],
-    relationOptions?: string[],
-  ) {
-    return await this.customerRepository.findOne({
-      where: fields,
-      relations: relationOptions,
-    });
+  async listCustomer() {
+    return await this.getAll();
   }
 
+  async getCustomerById(customerId: number) {
+    return await this.getAndCheckExist({ id: customerId });
+  }
   async listCustomersSameOffice(employee: Employee) {
-    const customers = this.getAllCustomers({
+    return this.getAll({
       saleEmployee: { officeCode: employee.officeCode },
     });
-    return customers;
   }
   async listMyCustomers(employee: Employee) {
-    const customers = await this.getAllCustomers({
+    const customers = await this.getAll({
       saleEmployee: { id: employee.id },
     });
     return customers;
   }
 
   async getMyCustomer(employee: Employee, customerId: number) {
-    const customer = await this.getCustomer({ id: customerId }, [
+    const customer = await this.getAndCheckExist({ id: customerId }, [
       'saleEmployee',
     ]);
-    if (!customer) {
-      throw new NotFoundException('Customer not found');
-    }
     if (employee.id !== customer.saleEmployee.id) {
       throw new UnauthorizedException();
     }
     return customer;
   }
   async getCustomerSameOffice(employee: Employee, customerId: number) {
-    const customer = await this.getCustomer({ id: customerId }, [
+    const customer = await this.getAndCheckExist({ id: customerId }, [
       'saleEmployee',
     ]);
-    if (!customer) {
-      throw new NotFoundException('Customer not found');
-    }
     if (employee.officeCode !== customer.saleEmployee.officeCode) {
       throw new UnauthorizedException();
     }
@@ -82,12 +61,8 @@ export class CustomerService {
   }
 
   async updateCustomer(customerId: number, data: UpdateCustomerDto) {
-    const customer = await this.getCustomer({ id: customerId });
-    if (!customer) {
-      throw new NotFoundException('customer not found');
-    }
-
-    return await this.customerRepository.update(customerId, data);
+    const customer = await this.getAndCheckExist({ id: customerId });
+    return await this.customerRepository.update(customer.id, data);
   }
 
   async updateCustomerSameOffice(
@@ -100,12 +75,8 @@ export class CustomerService {
   }
 
   async deleteCustomer(customerId: number) {
-    const customer = await this.getCustomer({ id: customerId });
-    if (!customer) {
-      throw new NotFoundException('customer not found');
-    }
-
-    return await this.customerRepository.delete(customerId);
+    const customer = await this.getAndCheckExist({ id: customerId });
+    return await this.customerRepository.delete(customer.id);
   }
 
   async deleteCustomerSameOffice(employee: Employee, customerId: number) {

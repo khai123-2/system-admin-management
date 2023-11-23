@@ -1,4 +1,8 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 
 @Injectable()
-export class RoleService {}
+export class RoleService {
+  async test() {
+    throw new NotFoundException();
+  }
+}

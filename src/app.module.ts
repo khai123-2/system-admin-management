@@ -6,9 +6,10 @@ import { TypeOrmConfigService } from './database/typeorm-config.service';
 import { UserModule } from './user/user.module';
 import { RoleModule } from './role/role.module';
 import { EmployeeModule } from './employee/employee.module';
-import { CustomerModule } from './customer/customer.module';
 import { PermissionModule } from './permission/permission.module';
 import { AuthModule } from './auth/auth.module';
+import { CustomerModule } from './customer/customer.module';
+import { SharedModule } from './shared/shared.module';
 import authConfig from './config/auth.config';
 
 @Module({
@@ -22,10 +23,11 @@ import authConfig from './config/auth.config';
     }),
     UserModule,
     RoleModule,
-    EmployeeModule,
     CustomerModule,
+    EmployeeModule,
     PermissionModule,
     AuthModule,
+    SharedModule,
   ],
 })
 export class AppModule {}
