@@ -10,23 +10,15 @@ export class PermissionService {
     @InjectRepository(Permission)
     private readonly permissionRepository: Repository<Permission>,
   ) {}
-  forActor(actor: User) {
-    return {
-      canDoAction: async (action: any, resource?: any) => {
-        const roleIds = actor.roles.map((role) => role.id);
-        const permissions = await this.permissionRepository
-          .createQueryBuilder('permission')
-          .leftJoin('permission.roles', 'role')
-          .leftJoin('permission.resource', 'resource')
-          .where('role.id IN (:...roleIds)', { roleIds })
-          .andWhere('permission.actionName = :action', { action })
-          .getMany();
 
-        if (permissions.length > 0) {
-          return true;
-        }
-        return false;
-      },
-    };
+  async listPermissionForUser(user: User): Promise<Permission[]> {
+    const roleIds = user.roles.map((role) => role.id);
+    const permissions = await this.permissionRepository
+      .createQueryBuilder('permission')
+      .leftJoin('permission.roles', 'role')
+      .leftJoin('permission.resource', 'resource')
+      .where('role.id IN (:...roleIds)', { roleIds })
+      .getMany();
+    return permissions;
   }
 }
