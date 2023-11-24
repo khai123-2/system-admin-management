@@ -1,30 +1,21 @@
-import {
-  Body,
-  Controller,
-  HttpStatus,
-  Post,
-  Req,
-  Res,
-  UseGuards,
-} from '@nestjs/common';
+import { Body, Controller, HttpStatus, Post, Res } from '@nestjs/common';
 import { UserService } from './user.service';
 import { CreateUserDto } from 'src/auth/dtos/create-user.dto';
-import { Request, Response } from 'express';
-import { AuthGuard } from '@nestjs/passport';
 import { User } from './entities/user.entity';
+import { Auth, CurrentUser } from 'src/decorators';
+import { Response } from 'express';
 
 @Controller('user')
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
   @Post()
-  @UseGuards(AuthGuard('jwt'))
+  @Auth()
   async createUser(
-    @Req() req: Request,
+    @CurrentUser() currentUser: User,
     @Body() body: CreateUserDto,
     @Res() res: Response,
   ) {
-    const currentUser = req.user as User;
     const user = await this.userService.createUser(currentUser, body);
     return res.status(HttpStatus.OK).send({ data: user });
   }

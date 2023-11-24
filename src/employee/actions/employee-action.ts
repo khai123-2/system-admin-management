@@ -4,7 +4,7 @@ export enum EmployeeAction {
   List_My_Employees = 'ListMyEmployees',
   Get_Employee = 'GetEmployee',
   Get_Employee_Same_Office = 'GetEmployeeSameOffice',
-  Get_My_employee = 'GetMyEmployee',
+  Get_My_Employee = 'GetMyEmployee',
   Create_Employee = 'CreateEmployee',
   Update_Employee = 'UpdateEmployee',
   Delete_Employee = 'DeleteEmployee',
