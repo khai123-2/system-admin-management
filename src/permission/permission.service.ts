@@ -21,4 +21,13 @@ export class PermissionService {
       .getMany();
     return permissions;
   }
+
+  async listPermissionsFromIds(permissionIds: number[]) {
+    const permissions = await this.permissionRepository
+      .createQueryBuilder('permission')
+      .where('permission.id IN (:...permissionIds)', { permissionIds })
+      .getMany();
+
+    return permissions;
+  }
 }

@@ -1,11 +1,11 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Customer } from './entities/customer.entity';
 import { Repository } from 'typeorm';
 import { Employee } from 'src/employee/entities/employee.entity';
-import { CreateCustomerDto } from './dtos/create-customer.dto';
-import { UpdateCustomerDto } from './dtos/update-customer.dto';
 import { BaseService } from 'src/utils/base.service';
+import { Customer } from '../entities/customer.entity';
+import { CreateCustomerDto } from '../dtos/create-customer.dto';
+import { UpdateCustomerDto } from '../dtos/update-customer.dto';
 
 @Injectable()
 export class CustomerService extends BaseService<Customer> {
@@ -39,7 +39,7 @@ export class CustomerService extends BaseService<Customer> {
     const customer = await this.getAndCheckExist({ id: customerId }, [
       'saleEmployee',
     ]);
-    if (employee.id !== customer.saleEmployee.id) {
+    if (employee.id !== customer.saleEmployee?.id) {
       throw new UnauthorizedException();
     }
     return customer;
@@ -48,7 +48,7 @@ export class CustomerService extends BaseService<Customer> {
     const customer = await this.getAndCheckExist({ id: customerId }, [
       'saleEmployee',
     ]);
-    if (employee.officeCode !== customer.saleEmployee.officeCode) {
+    if (employee.officeCode !== customer.saleEmployee?.officeCode) {
       throw new UnauthorizedException();
     }
     return customer;
