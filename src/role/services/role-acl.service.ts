@@ -4,6 +4,7 @@ import { User } from 'src/user/entities/user.entity';
 import { RoleService } from './role.service';
 import { RoleAction } from '../actions/role-action';
 import { CreateRoleDto } from '../dtos/create-role.dto';
+import { AttachPermissionDto } from '../dtos/attach-permission-dto';
 
 @Injectable()
 export class RoleAclService {
@@ -40,50 +41,40 @@ export class RoleAclService {
     return await this.roleService.createRole(data);
   }
 
-  // async updateCustomer(
-  //   actor: User,
-  //   customerId: number,
-  //   data: UpdateCustomerDto,
-  // ) {
-  //   const ability = await this.aclService.forActor(actor);
+  async attachPermissions(
+    actor: User,
+    roleId: number,
+    data: AttachPermissionDto,
+  ) {
+    const ability = await this.aclService.forActor(actor);
 
-  //   let result: UpdateResult;
-  //   switch (true) {
-  //     case ability.canDoAction(CustomerAction.Update_Customer):
-  //       result = await this.customerService.updateCustomer(customerId, data);
-  //       break;
+    if (!ability.canDoAction(RoleAction.Add_Permission_To_Role)) {
+      throw new UnauthorizedException();
+    }
 
-  //     case ability.canDoAction(CustomerAction.Update_Customer_Same_Office):
-  //       result = await this.customerService.updateCustomerSameOffice(
-  //         actor.employee,
-  //         customerId,
-  //         data,
-  //       );
-  //       break;
-  //     default:
-  //       throw new UnauthorizedException();
-  //   }
-  //   return result;
-  // }
+    return await this.roleService.attachPermissions(roleId, data);
+  }
 
-  // async deleteCustomer(actor: User, customerId: number) {
-  //   const ability = await this.aclService.forActor(actor);
+  async removePermissions(
+    actor: User,
+    roleId: number,
+    data: AttachPermissionDto,
+  ) {
+    const ability = await this.aclService.forActor(actor);
 
-  //   let result: DeleteResult;
-  //   switch (true) {
-  //     case ability.canDoAction(CustomerAction.Delete_Customer):
-  //       result = await this.customerService.deleteCustomer(customerId);
-  //       break;
+    if (!ability.canDoAction(RoleAction.Remove_Permission_From_Role)) {
+      throw new UnauthorizedException();
+    }
 
-  //     case ability.canDoAction(CustomerAction.Delete_Customer_Same_Office):
-  //       result = await this.customerService.deleteCustomerSameOffice(
-  //         actor.employee,
-  //         customerId,
-  //       );
-  //       break;
-  //     default:
-  //       throw new UnauthorizedException();
-  //   }
-  //   return result;
-  // }
+    return await this.roleService.removePermissions(roleId, data);
+  }
+
+  async deleteRole(actor: User, roleId: number) {
+    const ability = await this.aclService.forActor(actor);
+    if (!ability.canDoAction(RoleAction.Delete_Role)) {
+      throw new UnauthorizedException();
+    }
+
+    return await this.roleService.deleteRole(roleId);
+  }
 }
