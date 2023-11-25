@@ -42,4 +42,9 @@ export abstract class BaseService<Entity> {
     }
     return result;
   }
+
+  getMissingObjects(arr1: any[], arr2: any[]) {
+    const set2 = new Set(arr2.map((obj) => obj.id));
+    return arr1.filter((obj) => !set2.has(obj.id));
+  }
 }

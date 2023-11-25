@@ -16,7 +16,6 @@ export class PermissionService {
     const permissions = await this.permissionRepository
       .createQueryBuilder('permission')
       .leftJoin('permission.roles', 'role')
-      .leftJoin('permission.resource', 'resource')
       .where('role.id IN (:...roleIds)', { roleIds })
       .getMany();
     return permissions;
