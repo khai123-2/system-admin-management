@@ -13,7 +13,6 @@ import {
 import { Response } from 'express';
 import { Auth, CurrentUser } from 'src/decorators';
 import { User } from 'src/user/entities/user.entity';
-import { CustomerAclService } from './services/customer-acl.service';
 import { CreateCustomerDto } from './dtos/create-customer.dto';
 import { UpdateCustomerDto } from './dtos/update-customer.dto';
 import { CustomerService } from './services/customer.service';

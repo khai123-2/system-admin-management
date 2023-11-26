@@ -12,7 +12,7 @@ export class Role extends BaseEntity {
   @Exclude()
   description: string;
 
-  @ManyToMany(() => User, (user) => user.roles)
+  @ManyToMany(() => User, (user) => user.roles, { onDelete: 'CASCADE' })
   users: User[];
 
   @ManyToMany(() => Permission, (permission) => permission.roles)
