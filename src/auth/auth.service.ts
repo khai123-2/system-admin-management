@@ -8,7 +8,7 @@ import { AuthLoginDto } from './dtos/auth-login.dto';
 import { ConfigService } from '@nestjs/config';
 import { AllTypeConfig } from 'src/config/config.type';
 import { JwtService } from '@nestjs/jwt';
-import { UserService } from 'src/user/user.service';
+import { UserService } from 'src/user/services/user.service';
 
 @Injectable()
 export class AuthService {
@@ -18,10 +18,9 @@ export class AuthService {
     private readonly configService: ConfigService<AllTypeConfig>,
   ) {}
   async login(data: AuthLoginDto) {
-    const user = await this.userService.getUser({ username: data.username });
-    if (!user) {
-      throw new NotFoundException('user not found');
-    }
+    const user = await this.userService.getAndCheckExist({
+      username: data.username,
+    });
     const match = await comparePass(data.password, user.password);
     if (!match) {
       throw new BadRequestException('Invalid password');

@@ -3,7 +3,7 @@ import { Injectable } from '@nestjs/common';
 import { PermissionService } from 'src/permission/permission.service';
 import { EmployeeAction } from '../actions/employee-action';
 import { User } from 'src/user/entities/user.entity';
-import { BaseAclService } from 'src/shared/services/acl-demo.service';
+import { BaseAclService } from 'src/shared/services/acl.service';
 
 @Injectable()
 export class EmployeeAclService extends BaseAclService<Employee> {
