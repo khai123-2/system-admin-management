@@ -16,15 +16,16 @@ import { User } from 'src/user/entities/user.entity';
 import { CustomerAclService } from './services/customer-acl.service';
 import { CreateCustomerDto } from './dtos/create-customer.dto';
 import { UpdateCustomerDto } from './dtos/update-customer.dto';
+import { CustomerService } from './services/customer.service';
 
 @Controller('customer')
 export class CustomerController {
-  constructor(private readonly customerAclService: CustomerAclService) {}
+  constructor(private readonly customerService: CustomerService) {}
 
   @Get()
   @Auth()
   async listCustomers(@CurrentUser() user: User, @Res() res: Response) {
-    const employees = await this.customerAclService.listCustomers(user);
+    const employees = await this.customerService.listCustomers(user);
     return res.status(HttpStatus.OK).send({ data: employees });
   }
 
@@ -35,7 +36,7 @@ export class CustomerController {
     @Param('id') id: number,
     @Res() res: Response,
   ) {
-    const customer = await this.customerAclService.getCustomer(user, id);
+    const customer = await this.customerService.getCustomerById(user, id);
     return res.status(HttpStatus.OK).send({ data: customer });
   }
 
@@ -46,7 +47,7 @@ export class CustomerController {
     @Body() body: CreateCustomerDto,
     @Res() res: Response,
   ) {
-    const employee = await this.customerAclService.createCustomer(user, body);
+    const employee = await this.customerService.createCustomer(user, body);
     return res.status(HttpStatus.OK).send({ data: employee });
   }
 
@@ -58,7 +59,7 @@ export class CustomerController {
     @Body() body: UpdateCustomerDto,
     @Res() res: Response,
   ) {
-    const result = await this.customerAclService.updateCustomer(user, id, body);
+    const result = await this.customerService.updateCustomer(user, id, body);
 
     if (result.affected === 0) {
       throw new BadRequestException();
@@ -73,7 +74,7 @@ export class CustomerController {
     @Param('id') id: number,
     @Res() res: Response,
   ) {
-    const result = await this.customerAclService.deleteCustomer(user, id);
+    const result = await this.customerService.deleteCustomer(user, id);
     if (result.affected === 0) {
       throw new BadRequestException();
     }
