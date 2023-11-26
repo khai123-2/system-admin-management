@@ -10,53 +10,74 @@ import { BaseService } from 'src/utils/base.service';
 import { Employee } from '../entities/employee.entity';
 import { UpdateEmployeeDto } from '../dtos/update-employee.dto';
 import { CreateEmployeeDto } from '../dtos/create-employee.dto';
+import { EmployeeAclService } from './employee-acl.service';
+import { EmployeeAction } from '../actions/employee-action';
 @Injectable()
 export class EmployeeService extends BaseService<Employee> {
   constructor(
     @InjectRepository(Employee)
     private readonly employeeRepository: Repository<Employee>,
+    private readonly employeeAclService: EmployeeAclService,
   ) {
     super(employeeRepository, 'Employee not found');
   }
-  async listEmployees(): Promise<Employee[]> {
-    return await this.getAll();
-  }
+  async listEmployees(user: User): Promise<Employee[]> {
+    const ability = await this.employeeAclService.forActor(user);
 
-  async listEmployeesSameOffice(officeId: number): Promise<Employee[]> {
-    return await this.getAll({ officeCode: officeId });
-  }
+    let employees: Employee[];
+    switch (true) {
+      case ability.canDoAction(EmployeeAction.List_Employees):
+        employees = await this.getAll();
+        break;
 
-  async listMyEmployees(userId: number): Promise<Employee[]> {
-    return await this.getAll({ leader: { id: userId } });
-  }
+      case ability.canDoAction(EmployeeAction.List_Employees_Same_Office):
+        employees = await this.getAll({
+          officeCode: user.employee?.officeCode,
+        });
+        break;
 
-  async getEmployeeById(employeeId: number): Promise<Employee> {
-    return await this.getAndCheckExist({ id: employeeId });
-  }
-
-  async getEmployeeSameOffice(
-    user: User,
-    employeeId: number,
-  ): Promise<Employee> {
-    const employee = await this.getAndCheckExist({ id: employeeId });
-    if (user.employee?.officeCode !== employee.officeCode) {
-      throw new UnauthorizedException();
+      case ability.canDoAction(EmployeeAction.List_My_Employees):
+        employees = await this.getAll({ leader: { id: user.employee?.id } });
+        break;
+      default:
+        throw new UnauthorizedException();
     }
-    return employee;
+    return employees;
   }
 
-  async getMyEmployee(user: User, employeeId: number) {
+  async getEmployeeById(user: User, employeeId: number): Promise<Employee> {
     const employee = await this.getAndCheckExist({ id: employeeId }, [
       'leader',
     ]);
-    if (employee.leader?.id !== user.employee?.id) {
-      throw new UnauthorizedException();
+    const ability = await this.employeeAclService.forActor(user);
+
+    switch (true) {
+      case ability.canDoAction(EmployeeAction.Get_Employee):
+        return employee;
+
+      case ability.canDoAction(
+        EmployeeAction.Get_Employee_Same_Office,
+        employee,
+      ):
+        return employee;
+
+      case ability.canDoAction(EmployeeAction.Get_My_Employee, employee):
+        return employee;
+
+      default:
+        throw new UnauthorizedException();
     }
-    return employee;
   }
 
-  async createEmployee(data: CreateEmployeeDto) {
-    const checkEmailExist = await this.getAndCheckExist({ email: data.email });
+  async createEmployee(user: User, data: CreateEmployeeDto) {
+    const ability = await this.employeeAclService.forActor(user);
+
+    if (!ability.canDoAction(EmployeeAction.Create_Employee)) {
+      throw new UnauthorizedException();
+    }
+    const checkEmailExist = await this.getOne({
+      email: data.email,
+    });
 
     if (checkEmailExist) {
       throw new BadRequestException('Email is already exist');
@@ -70,7 +91,16 @@ export class EmployeeService extends BaseService<Employee> {
 
     return await this.employeeRepository.save(Employee.plainToClass(employee));
   }
-  async updateEmployee(employeeId: number, data: UpdateEmployeeDto) {
+  async updateEmployee(
+    user: User,
+    employeeId: number,
+    data: UpdateEmployeeDto,
+  ) {
+    const ability = await this.employeeAclService.forActor(user);
+
+    if (!ability.canDoAction(EmployeeAction.Update_Employee)) {
+      throw new UnauthorizedException();
+    }
     const employee = await this.getAndCheckExist({ id: employeeId });
 
     if (data.leaderId) {
@@ -85,6 +115,11 @@ export class EmployeeService extends BaseService<Employee> {
   }
 
   async deleteEmployee(user: User, employeeId: number): Promise<DeleteResult> {
+    const ability = await this.employeeAclService.forActor(user);
+
+    if (!ability.canDoAction(EmployeeAction.Delete_Employee)) {
+      throw new UnauthorizedException();
+    }
     if (user.employee?.id === employeeId) {
       throw new UnauthorizedException();
     }

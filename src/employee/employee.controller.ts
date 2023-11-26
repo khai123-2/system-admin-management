@@ -11,21 +11,20 @@ import {
   Res,
 } from '@nestjs/common';
 import { Response } from 'express';
-import { EmployeeAclService } from './services/employee-acl.service';
 import { User } from 'src/user/entities/user.entity';
 import { Auth, CurrentUser } from 'src/decorators';
-import { Employee } from './entities/employee.entity';
 import { CreateEmployeeDto } from './dtos/create-employee.dto';
 import { UpdateEmployeeDto } from './dtos/update-employee.dto';
+import { EmployeeService } from './services/employee.service';
 
 @Controller('employee')
 export class EmployeeController {
-  constructor(private readonly employeeAclService: EmployeeAclService) {}
+  constructor(private readonly employeeService: EmployeeService) {}
 
   @Get()
   @Auth()
   async listEmployees(@CurrentUser() user: User, @Res() res: Response) {
-    const employees = await this.employeeAclService.listEmployees(user);
+    const employees = await this.employeeService.listEmployees(user);
     return res.status(HttpStatus.OK).send({ data: employees });
   }
 
@@ -36,7 +35,7 @@ export class EmployeeController {
     @Param('id') id: number,
     @Res() res: Response,
   ) {
-    const employee = await this.employeeAclService.getEmployee(user, id);
+    const employee = await this.employeeService.getEmployeeById(user, id);
     return res.status(HttpStatus.OK).send({ data: employee });
   }
 
@@ -47,7 +46,7 @@ export class EmployeeController {
     @Body() body: CreateEmployeeDto,
     @Res() res: Response,
   ) {
-    const employee = await this.employeeAclService.createEmployee(user, body);
+    const employee = await this.employeeService.createEmployee(user, body);
     return res.status(HttpStatus.OK).send({ data: employee });
   }
 
@@ -59,11 +58,7 @@ export class EmployeeController {
     @Body() body: UpdateEmployeeDto,
     @Res() res: Response,
   ) {
-    const employee = await this.employeeAclService.updateEmployee(
-      user,
-      id,
-      body,
-    );
+    const employee = await this.employeeService.updateEmployee(user, id, body);
     return res.status(HttpStatus.OK).send({ data: employee });
   }
 
@@ -74,7 +69,7 @@ export class EmployeeController {
     @Param('id') id: number,
     @Res() res: Response,
   ) {
-    const result = await this.employeeAclService.deleteEmployee(user, id);
+    const result = await this.employeeService.deleteEmployee(user, id);
     if (result.affected === 0) {
       throw new BadRequestException();
     }

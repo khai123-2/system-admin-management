@@ -6,7 +6,7 @@ export enum CustomerAction {
   Get_My_Customer = 'GetMyCustomer',
   Get_Customer_Same_Office = 'GetCustomerSameOffice',
   Create_Customer = 'CreateCustomer',
-  Update_Customer = 'UpdateMyCustomer',
+  Update_Customer = 'UpdateCustomer',
   Update_Customer_Same_Office = 'UpdateCustomerSameOffice',
   Delete_Customer = 'DeleteCustomer',
   Delete_Customer_Same_Office = 'DeleteCustomerSameOffice',
