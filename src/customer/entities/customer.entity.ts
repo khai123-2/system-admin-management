@@ -18,6 +18,8 @@ export class Customer extends BaseEntity {
   @Column({ type: 'varchar', length: 255 })
   country: string;
 
-  @ManyToOne(() => Employee, (employee) => employee.customers)
+  @ManyToOne(() => Employee, (employee) => employee.customers, {
+    onDelete: 'SET NULL',
+  })
   saleEmployee: Employee;
 }

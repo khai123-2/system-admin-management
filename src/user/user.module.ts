@@ -6,9 +6,15 @@ import { User } from './entities/user.entity';
 import { PermissionModule } from 'src/permission/permission.module';
 import { UserAclService } from './services/user-acl.service';
 import { RoleModule } from 'src/role/role.module';
+import { EmployeeModule } from 'src/employee/employee.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([User]), PermissionModule, RoleModule],
+  imports: [
+    TypeOrmModule.forFeature([User]),
+    PermissionModule,
+    RoleModule,
+    EmployeeModule,
+  ],
   controllers: [UserController],
   providers: [UserService, UserAclService],
   exports: [UserService],

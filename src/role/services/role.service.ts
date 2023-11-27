@@ -4,13 +4,13 @@ import { Role } from '../entities/role.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { CreateRoleDto } from '../dtos/create-role.dto';
-import { PermissionService } from 'src/permission/permission.service';
 import { UpdateRoleInfoDto } from '../dtos/update-role-info.dto';
 import { AttachPermissionDto } from '../dtos/attach-permission.dto';
 import { User } from 'src/user/entities/user.entity';
 import { RoleAclService } from './role-acl.service';
 import { RoleAction } from '../actions/role-action';
 import { RemovePermissionDto } from '../dtos/remove-permission.dto';
+import { PermissionService } from 'src/permission/permission.service';
 
 @Injectable()
 export class RoleService extends BaseService<Role> {

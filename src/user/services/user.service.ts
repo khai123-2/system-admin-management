@@ -3,19 +3,19 @@ import {
   Injectable,
   UnauthorizedException,
 } from '@nestjs/common';
-import { Equal, Not, Repository } from 'typeorm';
+import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
-import { CreateUserDto } from 'src/auth/dtos/create-user.dto';
 import { generateHash } from 'src/utils/bcrypt';
 import { User } from '../entities/user.entity';
 import { UpdateUserDto } from '../dtos/update-user.dto';
 import { BaseService } from 'src/utils/base.service';
 import { UserAclService } from './user-acl.service';
 import { UserAction } from '../actions/user-action';
-import { AttachRolesDto } from '../dtos/remove-role';
-import { RoleAction } from 'src/role/actions/role-action';
 import { RoleService } from 'src/role/services/role.service';
-import { RemoveRolesDto } from '../dtos/attach-role.dto';
+import { AttachRolesDto } from '../dtos/attach-role.dto';
+import { RemoveRolesDto } from '../dtos/remove-role.dto';
+import { CreateUserDto } from '../dtos/create-user.dto';
+import { EmployeeService } from 'src/employee/services/employee.service';
 
 @Injectable()
 export class UserService extends BaseService<User> {
@@ -23,8 +23,9 @@ export class UserService extends BaseService<User> {
     @InjectRepository(User) private readonly userRepository: Repository<User>,
     private readonly userAclService: UserAclService,
     private readonly roleService: RoleService,
+    private readonly employeeService: EmployeeService,
   ) {
-    super(userRepository);
+    super(userRepository, 'User not found');
   }
   async listUsers(user: User) {
     const ability = await this.userAclService.forActor(user);
@@ -37,7 +38,10 @@ export class UserService extends BaseService<User> {
   }
 
   async getUser(actor: User, userId: number) {
-    const user = await this.getAndCheckExist({ id: userId }, ['roles']);
+    const user = await this.getAndCheckExist({ id: userId }, [
+      'roles',
+      'employee',
+    ]);
 
     const ability = await this.userAclService.forActor(actor);
 
@@ -61,13 +65,16 @@ export class UserService extends BaseService<User> {
     if (user) {
       throw new BadRequestException('username is already exist');
     }
-    const hashPassword = await generateHash(password);
-    const newUser = await this.userRepository.save({
-      ...data,
-      password: hashPassword,
-    });
 
-    return User.plainToClass(newUser);
+    const newUser = this.userRepository.create();
+    newUser.username = username;
+    newUser.password = await generateHash(password);
+    if (data.roleIds.length > 0) {
+      const roles = await this.roleService.listRolesFromIds(data.roleIds);
+      newUser.roles = roles;
+    }
+    const saveUser = await this.userRepository.save(newUser);
+    return User.plainToClass(saveUser);
   }
 
   async updateUser(actor: User, userId: number, data: UpdateUserDto) {
@@ -75,23 +82,22 @@ export class UserService extends BaseService<User> {
 
     const ability = await this.userAclService.forActor(actor);
 
+    const employee = await this.employeeService.getAndCheckExist({
+      id: data.employeeId,
+    });
+
+    if (!employee.user) {
+      throw new BadRequestException();
+    }
+    user.employee = employee;
+
     if (ability.canDoAction(UserAction.Update_User)) {
-      return await this.checkBeforeUpdate(userId, data);
+      return await this.userRepository.update(userId, user);
     }
     if (ability.canDoAction(UserAction.Update_My_User, user)) {
-      return await this.checkBeforeUpdate(userId, data);
+      return await this.userRepository.update(userId, user);
     }
     throw new UnauthorizedException();
-  }
-
-  async checkBeforeUpdate(userId: number, data: UpdateUserDto) {
-    const checkUserNameExits = await this.getOne({
-      username: data.username,
-    });
-    if (checkUserNameExits) {
-      throw new BadRequestException('username is already exist');
-    }
-    return await this.userRepository.update(userId, data);
   }
 
   async deleteUser(actor: User, userId: number) {
@@ -104,11 +110,11 @@ export class UserService extends BaseService<User> {
   }
 
   async attachRoles(actor: User, userId: number, data: AttachRolesDto) {
+    const user = await this.getAndCheckExist({ id: userId }, ['roles']);
     const ability = await this.userAclService.forActor(actor);
-    if (!ability.canDoAction(UserAction.Add_Role_To_User)) {
+    if (!ability.canDoAction(UserAction.Add_Role_To_User, user)) {
       throw new UnauthorizedException();
     }
-    const user = await this.getAndCheckExist({ id: userId }, ['roles']);
     if (data.roleIds.length > 0) {
       const roles = await this.roleService.listRolesFromIds(data.roleIds);
       user.roles.push(...roles);
@@ -117,11 +123,11 @@ export class UserService extends BaseService<User> {
   }
 
   async removeRoles(actor: User, userId: number, data: RemoveRolesDto) {
+    const user = await this.getAndCheckExist({ id: userId }, ['roles']);
     const ability = await this.userAclService.forActor(actor);
-    if (!ability.canDoAction(UserAction.Remove_Role_From_User)) {
+    if (!ability.canDoAction(UserAction.Remove_Role_From_User, user)) {
       throw new UnauthorizedException();
     }
-    const user = await this.getAndCheckExist({ id: userId }, ['roles']);
     if (data.roleIds.length > 0) {
       const rolesRemoved = await this.roleService.listRolesFromIds(
         data.roleIds,
