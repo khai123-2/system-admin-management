@@ -20,7 +20,9 @@ export class User extends BaseEntity {
   @Exclude()
   password: string;
 
-  @OneToOne(() => Employee, (employee) => employee.user)
+  @OneToOne(() => Employee, (employee) => employee.user, {
+    onDelete: 'SET NULL',
+  })
   @JoinColumn()
   employee: Employee;
 

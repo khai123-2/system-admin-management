@@ -1,9 +1,9 @@
 import { Injectable } from '@nestjs/common';
-import { PermissionService } from 'src/permission/permission.service';
 import { User } from 'src/user/entities/user.entity';
 import { BaseAclService } from 'src/shared/services/acl.service';
 import { Customer } from '../entities/customer.entity';
 import { CustomerAction } from '../actions/customer-action';
+import { PermissionService } from 'src/permission/permission.service';
 
 @Injectable()
 export class CustomerAclService extends BaseAclService<Customer> {

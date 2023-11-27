@@ -1,8 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { RoleAction } from '../actions/role-action';
 import { BaseAclService } from 'src/shared/services/acl.service';
-import { PermissionService } from 'src/permission/permission.service';
 import { Role } from '../entities/role.entity';
+import { PermissionService } from 'src/permission/permission.service';
 
 @Injectable()
 export class RoleAclService extends BaseAclService<Role> {

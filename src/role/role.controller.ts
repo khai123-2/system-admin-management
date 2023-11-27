@@ -18,19 +18,22 @@ import { CreateRoleDto } from './dtos/create-role.dto';
 import { RoleService } from './services/role.service';
 import { UpdateRoleInfoDto } from './dtos/update-role-info.dto';
 import { RemovePermissionDto } from './dtos/remove-permission.dto';
+import { ApiTags } from '@nestjs/swagger';
 
-@Controller('role')
+@ApiTags('Role')
+@Controller('roles')
 export class RoleController {
   constructor(private readonly roleService: RoleService) {}
+
   @Get()
-  @Auth()
-  async listEmployees(@CurrentUser() user: User, @Res() res: Response) {
+  @Auth('Get all roles')
+  async listRoles(@CurrentUser() user: User, @Res() res: Response) {
     const roles = await this.roleService.listRoles(user);
     return res.status(HttpStatus.OK).send({ data: roles });
   }
 
   @Get(':id')
-  @Auth()
+  @Auth('Get role by id')
   async getRoleById(
     @CurrentUser() user: User,
     @Param('id') id: number,
@@ -40,8 +43,8 @@ export class RoleController {
     return res.status(HttpStatus.OK).send({ data: role });
   }
 
-  @Post()
-  @Auth()
+  @Post('create')
+  @Auth('Create role')
   async createRole(
     @CurrentUser() user: User,
     @Body() body: CreateRoleDto,
@@ -52,7 +55,7 @@ export class RoleController {
   }
 
   @Patch(':id')
-  @Auth()
+  @Auth('Update role')
   async UpdateRoleInfo(
     @CurrentUser() user: User,
     @Param('id') id: number,
@@ -66,8 +69,8 @@ export class RoleController {
     return res.status(HttpStatus.OK).send({ message: 'success' });
   }
 
-  @Patch('add-permission/:id')
-  @Auth()
+  @Patch(':id/add-permissions')
+  @Auth('Attach permissions to role')
   async attachPermissionsToRole(
     @CurrentUser() user: User,
     @Param('id') id: number,
@@ -81,8 +84,8 @@ export class RoleController {
     return res.status(HttpStatus.OK).send({ message: 'success' });
   }
 
-  @Patch('remove-permission/:id')
-  @Auth()
+  @Patch(':id/remove-permissions')
+  @Auth('Remove permissions from role')
   async removePermissionsFromRole(
     @CurrentUser() user: User,
     @Param('id') id: number,
@@ -97,7 +100,7 @@ export class RoleController {
   }
 
   @Delete(':id')
-  @Auth()
+  @Auth('Delete role')
   async deleteRole(
     @CurrentUser() user: User,
     @Param('id') id: number,

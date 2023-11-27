@@ -16,20 +16,22 @@ import { User } from 'src/user/entities/user.entity';
 import { CreateCustomerDto } from './dtos/create-customer.dto';
 import { UpdateCustomerDto } from './dtos/update-customer.dto';
 import { CustomerService } from './services/customer.service';
+import { ApiTags } from '@nestjs/swagger';
 
-@Controller('customer')
+@ApiTags('Customer')
+@Controller('customers')
 export class CustomerController {
   constructor(private readonly customerService: CustomerService) {}
 
   @Get()
-  @Auth()
+  @Auth('Get all customers')
   async listCustomers(@CurrentUser() user: User, @Res() res: Response) {
     const employees = await this.customerService.listCustomers(user);
     return res.status(HttpStatus.OK).send({ data: employees });
   }
 
   @Get(':id')
-  @Auth()
+  @Auth('Get customer by id')
   async getCustomerById(
     @CurrentUser() user: User,
     @Param('id') id: number,
@@ -39,8 +41,8 @@ export class CustomerController {
     return res.status(HttpStatus.OK).send({ data: customer });
   }
 
-  @Post()
-  @Auth()
+  @Post('create')
+  @Auth('Create customer')
   async createCustomer(
     @CurrentUser() user: User,
     @Body() body: CreateCustomerDto,
@@ -51,7 +53,7 @@ export class CustomerController {
   }
 
   @Patch(':id')
-  @Auth()
+  @Auth('Update customer')
   async updateCustomer(
     @CurrentUser() user: User,
     @Param('id') id: number,
@@ -67,7 +69,7 @@ export class CustomerController {
   }
 
   @Delete(':id')
-  @Auth()
+  @Auth('Delete customer')
   async deleteCustomer(
     @CurrentUser() user: User,
     @Param('id') id: number,

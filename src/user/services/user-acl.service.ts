@@ -1,8 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { BaseAclService } from 'src/shared/services/acl.service';
-import { PermissionService } from 'src/permission/permission.service';
 import { UserAction } from '../actions/user-action';
 import { User } from '../entities/user.entity';
+import { PermissionService } from 'src/permission/permission.service';
 
 @Injectable()
 export class UserAclService extends BaseAclService<User> {
@@ -13,10 +13,11 @@ export class UserAclService extends BaseAclService<User> {
       UserAction.Get_User,
       UserAction.Create_User,
       UserAction.Update_User,
-      UserAction.Add_Role_To_User,
-      UserAction.Remove_Role_From_User,
     ]);
-
+    this.canDo(
+      [UserAction.Add_Role_To_User, UserAction.Remove_Role_From_User],
+      this.isNotUserItSelf,
+    );
     this.canDo(
       [UserAction.Get_My_User, UserAction.Update_My_User],
       this.isUserItSelf,

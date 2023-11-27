@@ -10,5 +10,6 @@ import { PermissionModule } from 'src/permission/permission.module';
   imports: [TypeOrmModule.forFeature([Employee]), PermissionModule],
   controllers: [EmployeeController],
   providers: [EmployeeService, EmployeeAclService],
+  exports: [EmployeeService],
 })
 export class EmployeeModule {}

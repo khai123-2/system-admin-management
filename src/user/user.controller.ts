@@ -10,28 +10,30 @@ import {
   Post,
   Res,
 } from '@nestjs/common';
-import { CreateUserDto } from 'src/auth/dtos/create-user.dto';
 import { User } from './entities/user.entity';
 import { Auth, CurrentUser } from 'src/decorators';
 import { Response } from 'express';
 import { UserService } from './services/user.service';
 import { UpdateUserDto } from './dtos/update-user.dto';
-import { AttachRolesDto } from './dtos/remove-role';
-import { RemoveRolesDto } from './dtos/attach-role.dto';
+import { ApiTags } from '@nestjs/swagger';
+import { AttachRolesDto } from './dtos/attach-role.dto';
+import { RemoveRolesDto } from './dtos/remove-role.dto';
+import { CreateUserDto } from './dtos/create-user.dto';
 
-@Controller('user')
+@ApiTags('User')
+@Controller('users')
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
   @Get()
-  @Auth()
+  @Auth('Get all users')
   async listUsers(@CurrentUser() user: User, @Res() res: Response) {
     const users = await this.userService.listUsers(user);
     return res.status(HttpStatus.OK).send({ data: users });
   }
 
   @Get(':id')
-  @Auth()
+  @Auth('Get user by id')
   async getUserById(
     @CurrentUser() actor: User,
     @Param('id') id: number,
@@ -40,8 +42,8 @@ export class UserController {
     const user = await this.userService.getUser(actor, id);
     return res.status(HttpStatus.OK).send({ data: user });
   }
-  @Post()
-  @Auth()
+  @Post('create')
+  @Auth('Create user')
   async createUser(
     @CurrentUser() currentUser: User,
     @Body() body: CreateUserDto,
@@ -52,7 +54,7 @@ export class UserController {
   }
 
   @Patch(':id')
-  @Auth()
+  @Auth('Update user')
   async UpdateUser(
     @CurrentUser() actor: User,
     @Param('id') id: number,
@@ -67,7 +69,7 @@ export class UserController {
   }
 
   @Delete(':id')
-  @Auth()
+  @Auth('Delete user')
   async deleteUser(
     @CurrentUser() actor: User,
     @Param('id') id: number,
@@ -80,8 +82,8 @@ export class UserController {
     return res.status(HttpStatus.OK).send({ message: 'success' });
   }
 
-  @Patch('add-role/:id')
-  @Auth()
+  @Patch(':id/add-roles')
+  @Auth('Attach roles to user')
   async attachRolesToUser(
     @CurrentUser() user: User,
     @Param('id') id: number,
@@ -95,8 +97,8 @@ export class UserController {
     return res.status(HttpStatus.OK).send({ message: 'success' });
   }
 
-  @Patch('remove-role/:id')
-  @Auth()
+  @Patch(':id/remove-roles')
+  @Auth('Remove roles from user')
   async removeRolesFromUser(
     @CurrentUser() user: User,
     @Param('id') id: number,

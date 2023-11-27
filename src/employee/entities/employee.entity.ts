@@ -26,17 +26,17 @@ export class Employee extends BaseEntity {
   @OneToOne(() => User, (user) => user.employee)
   user: User;
 
-  @ManyToOne(() => Employee, { nullable: true })
+  @ManyToOne(() => Employee, { nullable: true, onDelete: 'SET NULL' })
   @JoinColumn({
     name: 'reportTo',
   })
   leader: Employee;
 
-  @OneToMany(() => Employee, (employee) => employee.leader, { nullable: true })
+  @OneToMany(() => Employee, (employee) => employee.leader, {
+    nullable: true,
+  })
   myEmployees: Employee[];
 
-  @OneToMany(() => Customer, (customer) => customer.saleEmployee, {
-    onDelete: 'CASCADE',
-  })
+  @OneToMany(() => Customer, (customer) => customer.saleEmployee)
   customers: Customer[];
 }

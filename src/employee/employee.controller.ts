@@ -16,20 +16,22 @@ import { Auth, CurrentUser } from 'src/decorators';
 import { CreateEmployeeDto } from './dtos/create-employee.dto';
 import { UpdateEmployeeDto } from './dtos/update-employee.dto';
 import { EmployeeService } from './services/employee.service';
+import { ApiTags } from '@nestjs/swagger';
 
-@Controller('employee')
+@ApiTags('Employee')
+@Controller('employees')
 export class EmployeeController {
   constructor(private readonly employeeService: EmployeeService) {}
 
   @Get()
-  @Auth()
+  @Auth('Get all employees')
   async listEmployees(@CurrentUser() user: User, @Res() res: Response) {
     const employees = await this.employeeService.listEmployees(user);
     return res.status(HttpStatus.OK).send({ data: employees });
   }
 
   @Get(':id')
-  @Auth()
+  @Auth('Get employee by id')
   async getEmployeeById(
     @CurrentUser() user: User,
     @Param('id') id: number,
@@ -39,8 +41,8 @@ export class EmployeeController {
     return res.status(HttpStatus.OK).send({ data: employee });
   }
 
-  @Post()
-  @Auth()
+  @Post('create')
+  @Auth('Create employee')
   async createEmployee(
     @CurrentUser() user: User,
     @Body() body: CreateEmployeeDto,
@@ -51,7 +53,7 @@ export class EmployeeController {
   }
 
   @Patch(':id')
-  @Auth()
+  @Auth('Update employee')
   async updateEmployee(
     @CurrentUser() user: User,
     @Param('id') id: number,
@@ -63,7 +65,7 @@ export class EmployeeController {
   }
 
   @Delete(':id')
-  @Auth()
+  @Auth('Delete employee')
   async deleteEmployee(
     @CurrentUser() user: User,
     @Param('id') id: number,

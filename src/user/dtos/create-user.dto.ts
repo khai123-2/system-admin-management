@@ -1,6 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsNotEmpty, IsOptional, IsString } from 'class-validator';
-import { Role } from 'src/role/entities/role.entity';
 
 export class CreateUserDto {
   @ApiProperty()
@@ -15,5 +14,5 @@ export class CreateUserDto {
 
   @ApiProperty()
   @IsOptional()
-  roles?: Role[];
+  roleIds?: number[];
 }
