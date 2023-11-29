@@ -4,7 +4,6 @@ import { User } from 'src/user/entities/user.entity';
 import { Repository } from 'typeorm';
 import { BaseService } from 'src/utils/base.service';
 import { Permission } from './entities/permission.entity';
-// import { PermissionAclService } from './permission-acl.service';
 
 @Injectable()
 export class PermissionService extends BaseService<Permission> {
@@ -25,7 +24,7 @@ export class PermissionService extends BaseService<Permission> {
     return permissions;
   }
 
-  async listPermissionsFromIds(permissionIds: number[]) {
+  async listPermissionsFromIds(permissionIds: number[]): Promise<Permission[]> {
     const permissions = await this.permissionRepository
       .createQueryBuilder('permission')
       .where('permission.id IN (:...permissionIds)', { permissionIds })

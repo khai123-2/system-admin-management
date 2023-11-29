@@ -69,7 +69,7 @@ export class UserService extends BaseService<User> {
     const newUser = this.userRepository.create();
     newUser.username = username;
     newUser.password = await generateHash(password);
-    if (data.roleIds.length > 0) {
+    if (data.roleIds && data.roleIds.length > 0) {
       const roles = await this.roleService.listRolesFromIds(data.roleIds);
       newUser.roles = roles;
     }
@@ -78,15 +78,17 @@ export class UserService extends BaseService<User> {
   }
 
   async updateUser(actor: User, userId: number, data: UpdateUserDto) {
-    const user = await this.getAndCheckExist({ id: userId });
+    const user = await this.getAndCheckExist({ id: userId }, ['employee']);
 
     const ability = await this.userAclService.forActor(actor);
 
-    const employee = await this.employeeService.getAndCheckExist({
-      id: data.employeeId,
-    });
-
-    if (!employee.user) {
+    const employee = await this.employeeService.getAndCheckExist(
+      {
+        id: data.employeeId,
+      },
+      ['user'],
+    );
+    if (user.employee || employee.user) {
       throw new BadRequestException();
     }
     user.employee = employee;
@@ -115,7 +117,7 @@ export class UserService extends BaseService<User> {
     if (!ability.canDoAction(UserAction.Add_Role_To_User, user)) {
       throw new UnauthorizedException();
     }
-    if (data.roleIds.length > 0) {
+    if (data.roleIds && data.roleIds.length > 0) {
       const roles = await this.roleService.listRolesFromIds(data.roleIds);
       user.roles.push(...roles);
     }
@@ -128,12 +130,12 @@ export class UserService extends BaseService<User> {
     if (!ability.canDoAction(UserAction.Remove_Role_From_User, user)) {
       throw new UnauthorizedException();
     }
-    if (data.roleIds.length > 0) {
+    if (data.roleIds && data.roleIds.length > 0) {
       const rolesRemoved = await this.roleService.listRolesFromIds(
         data.roleIds,
       );
 
-      const newRoles = this.getMissingObjects(user.roles, rolesRemoved);
+      const newRoles = this.filterByIdIntersection(user.roles, rolesRemoved);
       user.roles = newRoles;
     }
     return await this.userRepository.save(user);

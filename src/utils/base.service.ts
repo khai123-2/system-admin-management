@@ -42,8 +42,13 @@ export abstract class BaseService<Entity> {
     }
     return result;
   }
-
-  getMissingObjects(arr1: any[], arr2: any[]) {
+  /**This function filter out elements from arr1 that have an id not present in arr2.
+   * @example
+   * arr1: [1,2,3,4]
+   * arr2: [1,4,5]
+   * output: [2,3]
+   */
+  filterByIdIntersection(arr1: any[], arr2: any[]) {
     const set2 = new Set(arr2.map((obj) => obj.id));
     return arr1.filter((obj) => !set2.has(obj.id));
   }
