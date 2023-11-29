@@ -43,7 +43,7 @@ export class RoleService extends BaseService<Role> {
       throw new UnauthorizedException();
     }
     const role = this.roleRepository.create(data);
-    if (data.permissionIds.length > 0) {
+    if (data.permissionIds && data.permissionIds.length > 0) {
       const permissions = await this.permissionService.listPermissionsFromIds(
         data.permissionIds,
       );
@@ -71,7 +71,7 @@ export class RoleService extends BaseService<Role> {
       throw new UnauthorizedException();
     }
     const role = await this.getAndCheckExist({ id: roleId }, ['permissions']);
-    if (data.permissionIds.length > 0) {
+    if (data.permissionIds && data.permissionIds.length > 0) {
       const permissions = await this.permissionService.listPermissionsFromIds(
         data.permissionIds,
       );
@@ -90,11 +90,11 @@ export class RoleService extends BaseService<Role> {
       throw new UnauthorizedException();
     }
     const role = await this.getAndCheckExist({ id: roleId }, ['permissions']);
-    if (data.permissionIds.length > 0) {
+    if (data.permissionIds && data.permissionIds.length > 0) {
       const permissionsRemoved =
         await this.permissionService.listPermissionsFromIds(data.permissionIds);
 
-      const newPermissions = this.getMissingObjects(
+      const newPermissions = this.filterByIdIntersection(
         role.permissions,
         permissionsRemoved,
       );
